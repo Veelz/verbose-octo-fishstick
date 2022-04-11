@@ -9,14 +9,19 @@ from support.constants import BEAR_AGE_MIN, BEAR_AGE_RANGE, BearType
 from utils.datetime_utils import DatetimeUtils
 
 
-@pytest.fixture(scope="class", autouse=True)
-def clear_all_data_before_test_run(api_object):
-    _ = api_object.delete_all_bears()
+def pytest_addoption(parser):
+    parser.addoption("--hostname", action="store", default=config.BASE_URL)
 
 
 @pytest.fixture(scope="class")
-def api_object():
-    yield AlaskaBearsApi(config.BASE_URL)
+def api_object(request):
+    hst = request.config.getoption("--hostname")
+    yield AlaskaBearsApi(hst)
+
+
+@pytest.fixture(scope="class", autouse=True)
+def clear_all_data_before_test_run(api_object):
+    _ = api_object.delete_all_bears()
 
 
 @pytest.fixture(scope='function')
