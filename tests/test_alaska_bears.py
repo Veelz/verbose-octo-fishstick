@@ -25,9 +25,11 @@ class TestAlaskaBears:
         assert_that(actual_body, equal_to(expected_body), 'Response body is incorrect')
 
     @pytest.mark.test_id(1)
-    def test_create_bear(self, api_object):
+    @pytest.mark.parametrize('bear_type', (constants.BearType.BLACK, constants.BearType.BROWN,
+                                           constants.BearType.GUMMY, constants.BearType.POLAR))
+    def test_create_bear(self, api_object, bear_type):
         logging.log(logging.INFO, f'1. Отправить POST-запрос на эндпоинт {api_object.BEAR_ENDPOINT_URL}')
-        bear_model = Bear(bear_type=constants.CreateValidBearData.BEAR_TYPE,
+        bear_model = Bear(bear_type=bear_type,
                           bear_name=constants.CreateValidBearData.BEAR_NAME,
                           bear_age=constants.CreateValidBearData.BEAR_AGE,
                           bear_id=None)
@@ -43,19 +45,11 @@ class TestAlaskaBears:
         self.assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
         assert_that(bear_model, is_in(actual), f'Response should contain the Bear but wasn\'t: {bear_model}')
 
-    @pytest.mark.test_id(2)
-    def test_get_bear_list(self, api_object):
-        logging.log(logging.INFO, f'1. Отправить GET-запрос на эндпоинт {api_object.BEAR_ENDPOINT_URL}')
-        response = api_object.get_bears_list()
+        logging.log(logging.INFO, f'3. Отправить GET-запрос на эндпоинт {api_object.BEAR_ID_ENDPOINT_URL.format(id=bear_id)}')
+        response = api_object.get_bear(bear_id)
+        actual = Bear(**response.json())
         self.assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
-        self.assert_response_is_in_json_format(response)
-        expected_content_ = [Bear(**entry) for entry in response.json()]
-        logging.log(logging.INFO, f'2. Отправить GET-запрос на эндпоинт {api_object.BEAR_ENDPOINT_URL}')
-        response = api_object.get_bears_list()
-        self.assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
-        self.assert_response_is_in_json_format(response)
-        actual_content = [Bear(**entry) for entry in response.json()]
-        self.assert_response_body_is_equal(actual_content, expected_content_)
+        assert_that(actual, dataclass_equals(bear_model), f'Response should contain the Bear but wasn\'t: {bear_model}')
 
     @pytest.mark.test_id(3)
     def test_get_bear(self, api_object, create_bear_with_valid_data):
@@ -67,21 +61,15 @@ class TestAlaskaBears:
         self.assert_response_is_in_json_format(response)
         actual = Bear(**response.json())
         assert_that(actual.bear_id, equal_to(bear_id), 'Response returned bear with incorrect bear_id')
-        expected_content_ = actual
-
-        logging.log(logging.INFO, f'2. Отправить GET-запрос на эндпоинт {api_object.BEAR_ID_ENDPOINT_URL.format(id=bear_id)}')
-        response = api_object.get_bear(bear_id)
-        self.assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
-        self.assert_response_is_in_json_format(response)
-        actual_content = Bear(**response.json())
-        self.assert_response_body_is_equal(actual_content, expected_content_)
 
     @pytest.mark.test_id(4)
-    def test_update_bear(self, api_object, create_bear_with_valid_data):
+    @pytest.mark.parametrize('bear_type', (constants.BearType.BLACK, constants.BearType.BROWN,
+                                           constants.BearType.GUMMY, constants.BearType.POLAR))
+    def test_update_bear(self, api_object, create_bear_with_valid_data, bear_type):
         bear_id = create_bear_with_valid_data.bear_id
 
         logging.log(logging.INFO, f'1. Отправить PUT-запрос на эндпоинт {api_object.BEAR_ID_ENDPOINT_URL.format(id=bear_id)}')
-        bear_model = Bear(bear_type=constants.UpdateBearData.BEAR_TYPE,
+        bear_model = Bear(bear_type=bear_type,
                           bear_name=constants.UpdateBearData.BEAR_NAME,
                           bear_age=constants.UpdateBearData.BEAR_AGE,
                           bear_id=bear_id)
