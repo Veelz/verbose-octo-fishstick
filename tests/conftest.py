@@ -9,23 +9,23 @@ from support.constants import BEAR_AGE_MIN, BEAR_AGE_RANGE, BearType
 from utils.datetime_utils import DatetimeUtils
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser) -> None:
     parser.addoption("--hostname", action="store", default=config.BASE_URL)
 
 
 @pytest.fixture(scope="class")
-def api_object(request):
+def api_object(request) -> AlaskaBearsApi:
     hst = request.config.getoption("--hostname")
     yield AlaskaBearsApi(hst)
 
 
 @pytest.fixture(scope="class", autouse=True)
-def clear_all_data_before_test_run(api_object):
+def clear_all_data_before_test_run(api_object) -> None:
     _ = api_object.delete_all_bears()
 
 
 @pytest.fixture(scope='function')
-def create_bear_with_valid_data(api_object):
+def create_bear_with_valid_data(api_object) -> Bear:
     name = f'test_name_{DatetimeUtils.timestamp()}'
     age = BEAR_AGE_MIN + BEAR_AGE_RANGE * random.random()
     bear_type = random.choice([getattr(BearType, attr) for attr in dir(BearType) if not attr.startswith('__')])
@@ -38,7 +38,7 @@ def create_bear_with_valid_data(api_object):
 
 
 @pytest.fixture(scope='function')
-def not_existing_bear_id(api_object):
+def not_existing_bear_id(api_object) -> int:
     response = api_object.get_bears_list()
     existing_ids = [Bear(**entry).bear_id for entry in response.json()]
     yield 1 + max(existing_ids, default=1)
