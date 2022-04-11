@@ -7,7 +7,6 @@ from requests import Response
 
 
 class ApiBase(ABC):
-
     def _get(self, uri: Union[str, bytes]) -> Response:
         logging.log(logging.INFO, f"Send GET-request: {uri}")
         return requests.get(uri)

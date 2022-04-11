@@ -1,14 +1,16 @@
+from typing import Any
+
 from hamcrest.core.base_matcher import BaseMatcher, T
 from hamcrest.core.description import Description
 
 
-def dataclass_equals(expected):
+def dataclass_equals(expected: T) -> 'IsDataclassEqualTo':
     return IsDataclassEqualTo(expected)
 
 
 class IsDataclassEqualTo(BaseMatcher):
     class MismatchEntry:
-        def __init__(self, attribute, expected, actual):
+        def __init__(self, attribute: str, expected: Any, actual: Any):
             self.attribute = attribute
             self.expected = expected
             self.actual = actual
@@ -34,7 +36,7 @@ class IsDataclassEqualTo(BaseMatcher):
     def _matches(self, item: T) -> bool:
         return self.__compare(self.dataclass_instance, item)
 
-    def __compare(self, expected_item: T, actual_item: T, path=""):
+    def __compare(self, expected_item: T, actual_item: T, path="") -> bool:
         if not hasattr(actual_item, '__annotations__'):
             return False
         if expected_item.__annotations__.keys() != actual_item.__annotations__.keys():

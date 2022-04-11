@@ -1,6 +1,7 @@
 from typing import Union
 
 import requests
+from requests import Response
 
 from api.api_base import ApiBase
 from models.bear import Bear
@@ -19,22 +20,22 @@ class AlaskaBearsApi(ApiBase):
             self.BASE_URL = base_url
         super().__init__()
 
-    def get_bear(self, bear_id: Union[int, str]):
+    def get_bear(self, bear_id: Union[int, str]) -> Response:
         return self._get(self.__FULL_BEAR_ID_URL.format(id=bear_id))
 
-    def get_bears_list(self):
+    def get_bears_list(self) -> Response:
         return self._get(self.__FULL_BEAR_URL)
 
-    def create_bear(self, bear_model: Bear):
+    def create_bear(self, bear_model: Bear) -> Response:
         payload = DataclassJsonEncoder.encode(bear_model)
         return self._post(self.__FULL_BEAR_URL, data=payload)
 
-    def update_bear(self, bear_model: Bear):
+    def update_bear(self, bear_model: Bear) -> Response:
         payload = DataclassJsonEncoder.encode(bear_model)
         return requests.put(self.__FULL_BEAR_ID_URL.format(id=bear_model.bear_id), data=payload)
 
-    def delete_all_bears(self):
+    def delete_all_bears(self) -> Response:
         return self._delete(self.__FULL_BEAR_URL)
 
-    def delete_bear(self, bear_id: Union[int, str]):
+    def delete_bear(self, bear_id: Union[int, str]) -> Response:
         return self._delete(self.__FULL_BEAR_ID_URL.format(id=bear_id))
