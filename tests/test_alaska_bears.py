@@ -7,7 +7,7 @@ from hamcrest import assert_that, equal_to, not_none, is_in, empty, calling, is_
 
 import config
 from api.alaska_bears_api import AlaskaBearsApi
-from models.bear_model import BearModel
+from models.bear import Bear
 from utils.custom_assertions import dataclass_equals
 from utils.datetime_utils import DatetimeUtils
 
@@ -33,7 +33,7 @@ class TestAlaskaBears:
         name = f'test_name_{DatetimeUtils.timestamp()}'
         age = self.AGE_MIN + self.AGE_RANGE * random.random()
         bear_type = random.choice(self.BEAR_TYPES)
-        bear_model = BearModel(bear_type=bear_type, bear_name=name, bear_age=age, bear_id=None)
+        bear_model = Bear(bear_type=bear_type, bear_name=name, bear_age=age, bear_id=None)
         response = api_object.create_bear(bear_model)
         if not response.text.isnumeric():
             raise ValueError('Bear was not created')
@@ -43,13 +43,13 @@ class TestAlaskaBears:
     @pytest.fixture(scope='function')
     def not_existing_bear_id(self, api_object):
         response = api_object.get_bears_list()
-        existing_ids = [BearModel(**entry).bear_id for entry in response.json()]
+        existing_ids = [Bear(**entry).bear_id for entry in response.json()]
         yield 1 + max(existing_ids, default=1)
 
     @pytest.mark.test_id(1)
     def test_create_bear(self, api_object):
         logging.log(logging.INFO, '1. Отправить POST-запрос на эндпоинт /bear')
-        bear_model = BearModel(bear_type='BLACK', bear_name='mikhail', bear_age=17.5, bear_id=None)
+        bear_model = Bear(bear_type='BLACK', bear_name='mikhail', bear_age=17.5, bear_id=None)
         response = api_object.create_bear(bear_model)
         bear_id = int(response.text) if response.text.isnumeric() else None
         assert_that(response.status_code, equal_to(200), 'Status code is incorrect')
@@ -58,7 +58,7 @@ class TestAlaskaBears:
         logging.log(logging.INFO, '2. Отправить GET-запрос на эндпоинт /bear')
         bear_model.bear_id = bear_id
         response = api_object.get_bears_list()
-        actual = [BearModel(**entry) for entry in response.json()]
+        actual = [Bear(**entry) for entry in response.json()]
         assert_that(response.status_code, equal_to(200), 'Status code is incorrect')
         assert_that(bear_model, is_in(actual), f'Response should contain the Bear but wasn\'t: {bear_model}')
 
@@ -86,7 +86,7 @@ class TestAlaskaBears:
         assert_that(response.status_code, equal_to(200), 'Status code is incorrect')
         assert_that(calling(response.json), is_not(raises(json.decoder.JSONDecodeError)),
                     "Response returned non-json body")
-        actual = BearModel(**response.json())
+        actual = Bear(**response.json())
         assert_that(actual.bear_id, equal_to(bear_id), 'Response returned bear with incorrect bear_id')
         expected_body = response.text
 
@@ -102,17 +102,17 @@ class TestAlaskaBears:
         bear_id = create_bear_with_valid_data.bear_id
 
         logging.log(logging.INFO, f'1. Отправить PUT-запрос на эндпоинт /bear/{bear_id}')
-        bear_model = BearModel(bear_type='BROWN',
-                               bear_name='test_name',
-                               bear_age=1.5,
-                               bear_id=create_bear_with_valid_data.bear_id)
+        bear_model = Bear(bear_type='BROWN',
+                          bear_name='test_name',
+                          bear_age=1.5,
+                          bear_id=create_bear_with_valid_data.bear_id)
         response = api_object.update_bear(bear_model)
         assert_that(response.status_code, equal_to(200), 'Status code is incorrect')
         assert_that(response.text, equal_to(self.SUCCESS_MESSAGE), 'Response body is incorrect')
 
         logging.log(logging.INFO, f'2. Отправить GET-запрос на эндпоинт /bear/{bear_id}')
         response = api_object.get_bear(bear_model.bear_id)
-        actual = BearModel(**response.json())
+        actual = Bear(**response.json())
         assert_that(response.status_code, equal_to(200), 'Status code is incorrect')
         assert_that(actual, dataclass_equals(bear_model), f'Response should contain the Bear but wasn\'t: {bear_model}')
 
@@ -123,7 +123,7 @@ class TestAlaskaBears:
 
         logging.log(logging.INFO, f'4. Отправить GET-запрос на эндпоинт /bear/{bear_id}')
         response = api_object.get_bear(bear_model.bear_id)
-        actual = BearModel(**response.json())
+        actual = Bear(**response.json())
         assert_that(response.status_code, equal_to(200), 'Status code is incorrect')
         assert_that(actual, dataclass_equals(bear_model), f'Response should contain the Bear but wasn\'t: {bear_model}')
 
@@ -160,7 +160,7 @@ class TestAlaskaBears:
 
         logging.log(logging.INFO, f'2. Отправить GET-запрос на эндпоинт /bear')
         response = api_object.get_bears_list()
-        actual = [BearModel(**entry) for entry in response.json()]
+        actual = [Bear(**entry) for entry in response.json()]
         assert_that(response.status_code, equal_to(200), 'Status code is incorrect')
         assert_that([bear for bear in actual if bear.bear_id == bear_id], empty(),
                     f'Response contains bear with id "{bear_id}" but should\'nt')
@@ -186,10 +186,10 @@ class TestAlaskaBears:
     @pytest.mark.test_id(9)
     def test_update_not_existing_bear(self, api_object, not_existing_bear_id):
         logging.log(logging.INFO, f'1. Отправить PUT-запрос на эндпоинт /bear/{not_existing_bear_id}')
-        bear_model = BearModel(bear_id=not_existing_bear_id,
-                               bear_type='BROWN',
-                               bear_name='test_name',
-                               bear_age=1.5)
+        bear_model = Bear(bear_id=not_existing_bear_id,
+                          bear_type='BROWN',
+                          bear_name='test_name',
+                          bear_age=1.5)
         response = api_object.update_bear(bear_model)
         assert_that(response.status_code, equal_to(404), 'Status code is incorrect')
 

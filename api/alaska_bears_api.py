@@ -1,44 +1,38 @@
-import logging
+from typing import Union
+
 import requests
 
-from models.bear_model import BearModel
+from api.api_base import ApiBase
+from models.bear import Bear
 from utils.dataclass_json_encoder import DataclassJsonEncoder
 
 
-class AlaskaBearsApi:
+class AlaskaBearsApi(ApiBase):
     BASE_URL = 'http://localhost:8091'
     BEAR_ENDPOINT_URL = BASE_URL + '/bear'
     BEAR_ID_ENDPOINT_URL = BASE_URL + '/bear/{id}'
 
-    def __init__(self, base_url=None):
+    def __init__(self, base_url: str = None):
         if base_url is not None:
             self.BASE_URL = base_url
+        super().__init__()
 
-    def get_bear(self, bear_id):
-        uri = self.BEAR_ID_ENDPOINT_URL.format(id=bear_id)
-        logging.log(logging.INFO, f"Send GET-request: {uri}")
-        return requests.get(uri)
+    def get_bear(self, bear_id: Union[int, str]):
+        return self._get(self.BEAR_ID_ENDPOINT_URL.format(id=bear_id))
 
     def get_bears_list(self):
-        logging.log(logging.INFO, f"Send GET-request: {self.BEAR_ENDPOINT_URL}")
-        return requests.get(self.BEAR_ENDPOINT_URL)
+        return self._get(self.BEAR_ENDPOINT_URL)
 
-    def create_bear(self, bear_model: BearModel):
+    def create_bear(self, bear_model: Bear):
         payload = DataclassJsonEncoder.encode(bear_model)
-        logging.log(logging.INFO, f"Send POST-request: {self.BEAR_ENDPOINT_URL}, data: {payload}")
-        return requests.post(self.BEAR_ENDPOINT_URL, data=payload)
+        return self._post(self.BEAR_ENDPOINT_URL, data=payload)
 
-    def update_bear(self, bear_model: BearModel):
-        uri = self.BEAR_ID_ENDPOINT_URL.format(id=bear_model.bear_id)
+    def update_bear(self, bear_model: Bear):
         payload = DataclassJsonEncoder.encode(bear_model)
-        logging.log(logging.INFO, f"Send PUT-request: {uri}, data: {payload}")
-        return requests.put(uri, data=payload)
+        return requests.put(self.BEAR_ID_ENDPOINT_URL.format(id=bear_model.bear_id), data=payload)
 
     def delete_all_bears(self):
-        logging.log(logging.INFO, f"Send DELETE-request: {self.BEAR_ENDPOINT_URL}")
-        return requests.delete(self.BEAR_ENDPOINT_URL)
+        return self._delete(self.BEAR_ENDPOINT_URL)
 
-    def delete_bear(self, bear_id):
-        uri = self.BEAR_ID_ENDPOINT_URL.format(id=bear_id)
-        logging.log(logging.INFO, f"Send DELETE-request: {uri}")
-        return requests.delete(self.BEAR_ID_ENDPOINT_URL.format(id=bear_id))
+    def delete_bear(self, bear_id: Union[int, str]):
+        return self._delete(self.BEAR_ID_ENDPOINT_URL.format(id=bear_id))

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass(init=True, eq=True)
-class BearModel:
+class Bear:
     bear_id: int
     bear_type: str
     bear_name: str
