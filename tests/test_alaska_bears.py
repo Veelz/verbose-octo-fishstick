@@ -47,8 +47,8 @@ class TestAlaskaBears:
             self.assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
             assert_that(bear_model, is_in(actual), f'Response should contain the Bear but wasn\'t: {bear_model}')
 
-    @allure.title("3. Получить запись о медведе")
-    @pytest.mark.test_id(3)
+    @allure.title("2. Получить запись о медведе")
+    @pytest.mark.test_id(2)
     def test_get_bear(self, api_object, create_bear_with_valid_data):
         bear_id = create_bear_with_valid_data.bear_id
         with allure.step(f'1. Отправить GET-запрос на эндпоинт {api_object.BEAR_ID_ENDPOINT_URL.format(id=bear_id)}'):
@@ -58,8 +58,8 @@ class TestAlaskaBears:
             actual = Bear(**response.json())
             assert_that(actual.bear_id, equal_to(bear_id), 'Response returned bear with incorrect bear_id')
 
-    @allure.title("4. Обновить запись о медведе")
-    @pytest.mark.test_id(4)
+    @allure.title("3. Обновить запись о медведе")
+    @pytest.mark.test_id(3)
     @pytest.mark.parametrize('bear_type', (constants.BearType.BLACK, constants.BearType.BROWN,
                                            constants.BearType.GUMMY, constants.BearType.POLAR))
     def test_update_bear(self, api_object, create_bear_with_valid_data, bear_type):
@@ -79,8 +79,8 @@ class TestAlaskaBears:
             self.assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
             assert_that(actual, dataclass_equals(bear_model), f'Response should contain the Bear but wasn\'t: {bear_model}')
 
-    @allure.title("5. Удалить записи о всех медведях")
-    @pytest.mark.test_id(5)
+    @allure.title("4. Удалить записи о всех медведях")
+    @pytest.mark.test_id(4)
     def test_delete_all_bears(self, api_object):
         with allure.step(f'1. Отправить DELETE-запрос на эндпоинт {api_object.BEAR_ENDPOINT_URL}'):
             response = api_object.delete_all_bears()
@@ -92,8 +92,8 @@ class TestAlaskaBears:
             self.assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
             assert_that(response.json(), empty(), 'Response body is incorrect')
 
-    @allure.title("6. Удалить запись о медведе")
-    @pytest.mark.test_id(6)
+    @allure.title("5. Удалить запись о медведе")
+    @pytest.mark.test_id(5)
     def test_delete_bear(self, api_object, create_bear_with_valid_data):
         bear_id = create_bear_with_valid_data.bear_id
         with allure.step(f'1. Отправить DELETE-запрос на эндпоинт {api_object.BEAR_ID_ENDPOINT_URL.format(id=bear_id)}'):
@@ -108,16 +108,16 @@ class TestAlaskaBears:
             assert_that([bear for bear in actual if bear.bear_id == bear_id], empty(),
                         f'Response contains bear with id "{bear_id}" but should\'nt')
 
-    @allure.title("7. Получить несуществующую запись о медведе")
-    @pytest.mark.test_id(7)
+    @allure.title("6. Получить несуществующую запись о медведе")
+    @pytest.mark.test_id(6)
     def test_get_not_existing_bear(self, api_object, not_existing_bear_id):
         with allure.step(f'1. Отправить GET-запрос на эндпоинт {api_object.BEAR_ID_ENDPOINT_URL.format(id=not_existing_bear_id)}'):
             response = api_object.get_bear(not_existing_bear_id)
             self.assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
             self.assert_response_body_is_equal(response.text, constants.ResponseMessages.EMPTY)
 
-    @allure.title("9. Обновить запись несуществующего медведя")
-    @pytest.mark.test_id(9)
+    @allure.title("8. Обновить запись несуществующего медведя")
+    @pytest.mark.test_id(8)
     def test_update_not_existing_bear(self, api_object, not_existing_bear_id):
         with allure.step(f'1. Отправить PUT-запрос на эндпоинт {api_object.BEAR_ID_ENDPOINT_URL.format(id=not_existing_bear_id)}'):
             bear_model = Bear(bear_id=not_existing_bear_id,
@@ -127,8 +127,8 @@ class TestAlaskaBears:
             response = api_object.update_bear(bear_model)
             self.assert_status_code_is_equal(response.status_code, HTTPStatus.NOT_FOUND)
 
-    @allure.title("10. Удалить запись несуществующего медведя")
-    @pytest.mark.test_id(10)
+    @allure.title("9. Удалить запись несуществующего медведя")
+    @pytest.mark.test_id(9)
     def test_delete_not_existing_bear(self, api_object, not_existing_bear_id):
         with allure.step(f'1. Отправить DELETE-запрос на эндпоинт {api_object.BEAR_ID_ENDPOINT_URL.format(id=not_existing_bear_id)}'):
             response = api_object.delete_bear(not_existing_bear_id)
