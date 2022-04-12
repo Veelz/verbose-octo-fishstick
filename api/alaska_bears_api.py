@@ -1,6 +1,5 @@
 from typing import Union
 
-import requests
 from requests import Response
 
 from api.api_base import ApiBase
@@ -32,7 +31,7 @@ class AlaskaBearsApi(ApiBase):
 
     def update_bear(self, bear_model: Bear) -> Response:
         payload = DataclassJsonEncoder.encode(bear_model)
-        return requests.put(self.__FULL_BEAR_ID_URL.format(id=bear_model.bear_id), data=payload)
+        return self._put(self.__FULL_BEAR_ID_URL.format(id=bear_model.bear_id), data=payload)
 
     def delete_all_bears(self) -> Response:
         return self._delete(self.__FULL_BEAR_URL)

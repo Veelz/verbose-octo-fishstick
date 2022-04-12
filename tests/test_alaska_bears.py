@@ -8,6 +8,7 @@ from hamcrest import assert_that, equal_to, not_none, is_in, empty, calling, is_
 from models.bear import Bear
 from utils.custom_assertions import dataclass_equals
 import support.constants as constants
+import support.test_data as test_data
 
 
 class TestAlaskaBears:
@@ -31,8 +32,8 @@ class TestAlaskaBears:
     def test_create_bear(self, api_object, bear_type):
         with allure.step(f'1. Отправить POST-запрос на эндпоинт {api_object.BEAR_ENDPOINT_URL}'):
             bear_model = Bear(bear_type=bear_type,
-                              bear_name=constants.CreateValidBearData.BEAR_NAME,
-                              bear_age=constants.CreateValidBearData.BEAR_AGE,
+                              bear_name=test_data.ValidBearData.BEAR_NAME,
+                              bear_age=test_data.ValidBearData.BEAR_AGE,
                               bear_id=None)
             response = api_object.create_bear(bear_model)
             bear_id = int(response.text) if response.text.isnumeric() else None
@@ -65,8 +66,8 @@ class TestAlaskaBears:
         bear_id = create_bear_with_valid_data.bear_id
         with allure.step(f'1. Отправить PUT-запрос на эндпоинт {api_object.BEAR_ID_ENDPOINT_URL.format(id=bear_id)}'):
             bear_model = Bear(bear_type=bear_type,
-                              bear_name=constants.UpdateBearData.BEAR_NAME,
-                              bear_age=constants.UpdateBearData.BEAR_AGE,
+                              bear_name=test_data.ValidBearData.BEAR_NAME,
+                              bear_age=test_data.ValidBearData.BEAR_AGE,
                               bear_id=bear_id)
             response = api_object.update_bear(bear_model)
             self.assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
@@ -120,9 +121,9 @@ class TestAlaskaBears:
     def test_update_not_existing_bear(self, api_object, not_existing_bear_id):
         with allure.step(f'1. Отправить PUT-запрос на эндпоинт {api_object.BEAR_ID_ENDPOINT_URL.format(id=not_existing_bear_id)}'):
             bear_model = Bear(bear_id=not_existing_bear_id,
-                              bear_type=constants.UpdateBearData.BEAR_TYPE,
-                              bear_name=constants.UpdateBearData.BEAR_NAME,
-                              bear_age=constants.UpdateBearData.BEAR_AGE)
+                              bear_type=test_data.ValidBearData.BEAR_TYPE,
+                              bear_name=test_data.ValidBearData.BEAR_NAME,
+                              bear_age=test_data.ValidBearData.BEAR_AGE)
             response = api_object.update_bear(bear_model)
             self.assert_status_code_is_equal(response.status_code, HTTPStatus.NOT_FOUND)
 
