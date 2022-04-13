@@ -31,7 +31,7 @@ class TestAlaskaBears:
         with allure.step(f'2. Отправить GET-запрос на эндпоинт {api_object.BEAR_ENDPOINT_URL}'):
             bear_model.bear_id = bear_id
             response = api_object.get_bears_list()
-            actual = [Bear(**entry) for entry in response.json()]
+            actual = Bear.schema().loads(response.text, many=True)
             assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
             assert_that(bear_model, is_in(actual), f'Response should contain the Bear but wasn\'t: {bear_model}')
 
@@ -43,7 +43,7 @@ class TestAlaskaBears:
             response = api_object.get_bear(bear_id)
             assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
             assert_response_is_in_json_format(response)
-            actual = Bear(**response.json())
+            actual = Bear.schema().loads(response.text)
             assert_that(actual.bear_id, equal_to(bear_id), 'Response returned bear with incorrect bear_id')
 
     @allure.title("3. Обновить запись о медведе")
@@ -63,7 +63,7 @@ class TestAlaskaBears:
 
         with allure.step(f'2. Отправить GET-запрос на эндпоинт {api_object.BEAR_ID_ENDPOINT_URL.format(id=bear_id)}'):
             response = api_object.get_bear(bear_model.bear_id)
-            actual = Bear(**response.json())
+            actual = Bear.schema().loads(response.text)
             assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
             assert_that(actual, dataclass_equals(bear_model), f'Response should contain the Bear but wasn\'t: {bear_model}')
 
@@ -91,7 +91,7 @@ class TestAlaskaBears:
 
         with allure.step(f'2. Отправить GET-запрос на эндпоинт {api_object.BEAR_ENDPOINT_URL}'):
             response = api_object.get_bears_list()
-            actual = [Bear(**entry) for entry in response.json()]
+            actual = Bear.schema().loads(response.text, many=True)
             assert_status_code_is_equal(response.status_code, HTTPStatus.OK)
             assert_that([bear for bear in actual if bear.bear_id == bear_id], empty(),
                         f'Response contains bear with id "{bear_id}" but should\'nt')

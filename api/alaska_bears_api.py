@@ -4,7 +4,6 @@ from requests import Response
 
 from api.api_base import ApiBase
 from models.bear import Bear
-from utils.dataclass_json_encoder import DataclassJsonEncoder
 
 
 class AlaskaBearsApi(ApiBase):
@@ -26,11 +25,11 @@ class AlaskaBearsApi(ApiBase):
         return self._get(self.__FULL_BEAR_URL)
 
     def create_bear(self, bear_model: Bear) -> Response:
-        payload = DataclassJsonEncoder.encode(bear_model)
+        payload = bear_model.to_json()
         return self._post(self.__FULL_BEAR_URL, data=payload)
 
     def update_bear(self, bear_model: Bear) -> Response:
-        payload = DataclassJsonEncoder.encode(bear_model)
+        payload = bear_model.to_json()
         return self._put(self.__FULL_BEAR_ID_URL.format(id=bear_model.bear_id), data=payload)
 
     def delete_all_bears(self) -> Response:
